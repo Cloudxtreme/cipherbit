@@ -13,7 +13,10 @@ generate_keys = ->
 
 encrypt = (text, public_key) ->
     nonce = sodium.randombytes_buf(sodium.crypto_box_NONCEBYTES)
-    sodium.crypto_box_easy(text, nonce, public_key, private_key())
+    {
+        ciphertext: sodium.crypto_box_easy(text, nonce, public_key, private_key()),
+        nonce: nonce
+    }
 
 $(document).ready ->
     generate_keys() if public_key() is null
@@ -22,10 +25,11 @@ $(document).ready ->
     $('#keyart').html("<pre>#{randomart(public_key())}</pre>")
     $('#encrypt').click ->
         # All values are raw byte arrays, to strings or hex, etc.
-        destination_key = sodium.from_hex($('#destination_key').val())
+        #destination_key = sodium.from_hex($('#destination_key').val())
+        destination_key = public_key()
         subject = $('#subject').val()
         body = $('#body').val()
         encrypted_subject = encrypt(subject, destination_key)
         encrypted_body = encrypt(body, destination_key)
-        $('#subject').val(sodium.to_hex(encrypted_subject))
-        $('#body').val(sodium.to_hex(encrypted_body))
+        $('#subject').val(sodium.to_hex(encrypted_subject['ciphertext']))
+        $('#body').val(sodium.to_hex(encrypted_body['ciphertext']))
