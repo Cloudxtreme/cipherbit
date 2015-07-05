@@ -1,12 +1,22 @@
-%h1 New Message
-= form_for :message, url: messages_url do |f|
-  %p
-    = f.label :subject
-    = f.text_field :subject
+%h1 Send Message
+%h4 You are sending using public key:
+%div{id: 'pubkey', style: 'color: blue'}
 
-  %p
-    = f.label :text
-    = f.text_area :text
+%h4 RandomArt for your public key
+%div{id: 'keyart', style: 'color: red'}
 
-  %p
-    = f.submit
+%p
+  %label{for:'destination_key'}
+    Recipient's Key
+  %input{type: 'text', id: 'destination_key'}
+
+%p
+  %label{for:'subject'}
+    Subject
+  %input{type: 'text', id: 'subject'}
+
+%p
+  %textarea{rows: '10', cols: '50', id: 'body'}
+
+%button{type: 'button', id: 'encrypt'}
+  Encrypt
