@@ -11,9 +11,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 0) do
+ActiveRecord::Schema.define(version: 20150705134550) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "messages", force: :cascade do |t|
+    t.string "source"
+    t.string "destination"
+    t.json   "metadata"
+    t.json   "body"
+  end
+
+  add_index "messages", ["destination", "source"], name: "index_messages_on_destination_and_source", using: :btree
 
 end

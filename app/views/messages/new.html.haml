@@ -5,18 +5,36 @@
 %h4 RandomArt for your public key
 %div{id: 'keyart', style: 'color: red'}
 
-%p
-  %label{for:'destination_key'}
-    Recipient's Key
-  %input{type: 'text', id: 'destination_key'}
+%form{id: 'messageform', action: "#{ messages_path }", method: 'post', autocomplete: 'off'}
 
-%p
-  %label{for:'subject'}
-    Subject
-  %input{type: 'text', id: 'subject'}
+  -# Submitted but not shown
+  %input{type: 'hidden', name: 'authenticity_token', value: "#{ form_authenticity_token }"}
 
-%p
-  %textarea{rows: '10', cols: '50', id: 'body'}
+  -# Hidden fields populated by client-side script prior to submission
+  %input{type: 'hidden', name: 'metadata', id: 'metadata'}
+  %input{type: 'hidden', name: 'metadata_nonce', id: 'metadata_nonce'}
 
-%button{type: 'button', id: 'encrypt'}
-  Encrypt
+  %input{type: 'hidden', name: 'body', id: 'body'}
+  %input{type: 'hidden', name: 'body_nonce', id: 'body_nonce'}
+
+  %input{type: 'hidden', name: 'source', id: 'source'}
+
+  %p
+    %label{for:'destination'}
+      Recipient's Key
+    %br
+    %input{type: 'text', size: '70', name: 'destination', id: 'destination'}
+
+  -# Shown but not submitted.  Used to generate data in hidden form
+    fields by client-side script
+  %p
+    %label{for:'subject'}
+      Subject
+    %br
+    %input{type: 'text', size: '70', id: 'form_subject'}
+
+  %p
+    %textarea{rows: '15', cols: '70', id: 'form_body'}
+
+  %button{type: 'button', id: 'encryptandsend'}
+    Encrypt & Send
