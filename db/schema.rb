@@ -17,10 +17,10 @@ ActiveRecord::Schema.define(version: 20150705134550) do
   enable_extension "plpgsql"
 
   create_table "messages", force: :cascade do |t|
-    t.string "source"
-    t.string "destination"
-    t.json   "metadata"
-    t.json   "body"
+    t.string "source",      null: false
+    t.string "destination", null: false
+    t.json   "metadata",    null: false
+    t.json   "body",        null: false
   end
 
   add_index "messages", ["destination", "source"], name: "index_messages_on_destination_and_source", using: :btree

@@ -3,11 +3,19 @@ class MessagesController < ApplicationController
 
   PERMITTED_PARAMS = %i(source destination metadata metadata_nonce body body_nonce)
 
-  def index
-    render plain: ''
+  # Actions that return the browser UI
+
+  def inbox
   end
 
   def new
+  end
+
+  # Actions that return JSON (API calls)
+
+  def index
+    key = params[:key]
+    render json: Message.where(destination: key)
   end
 
   def create
@@ -15,7 +23,7 @@ class MessagesController < ApplicationController
                    destination: message_params[:destination],
                    metadata: build_metadata,
                    body: build_body)
-    redirect_to messages_url
+    redirect_to action: 'inbox'
   end
 
   private

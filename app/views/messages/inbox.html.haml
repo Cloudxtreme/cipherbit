@@ -1,0 +1,25 @@
+%navigation
+  %ul
+    %li
+      %a{href: '/messages/inbox'}
+        Inbox
+    %li
+      %a{href: '/messages/new'}
+        Compose
+
+  Your key art:
+  %div{id: 'keyart'}
+
+%main
+  %h1 Inbox
+
+  %div{id: 'messagelist'}
+
+  %hr
+
+  Your public key:
+  %span{id: 'pubkey'}
+-# View specific JavaScript
+:coffee
+  $(document).ready ->
+    window.retrieve_messages()

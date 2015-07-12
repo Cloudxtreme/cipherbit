@@ -13,5 +13,6 @@
 //= require jquery
 //= require jquery_ujs
 //= require sodium.min
+//= require underscore-min
 //= require randomart
 //= require_tree .
