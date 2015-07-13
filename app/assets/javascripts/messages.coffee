@@ -30,6 +30,12 @@ decrypt = (ciphertext, nonce, source) ->
   pvt = private_key()
   sodium.crypto_box_open_easy(c, n, pub, pvt)
 
+decrypt_string = (ciphertext, nonce, source) ->
+  sodium.to_string(decrypt(ciphertext, nonce, source))
+
+decrypt_json = (ciphertext, nonce, source) ->
+  JSON.parse(decrypt_string(ciphertext, nonce, source))
+
 populate_message_and_submit = (bundle) ->
   $('#source').val(bundle.source_key)
   $('#metadata').val(sodium.to_hex(bundle.encrypted_metadata['ciphertext']))
@@ -41,8 +47,8 @@ populate_message_and_submit = (bundle) ->
 # Template to render rows in the message inbox
 message_row = _.template("""
   <tr>
-    <td width="40%"><%= metadata.subject %></td>
-    <td width="15%"><%= metadata.sent_at %></td>
+    <td width="40%"><a href="/messages/<%= id %>/view"><%= metadata.subject %></a></td>
+    <td width="20%"><%= metadata.sent_at %></td>
     <td width="15%"><%= source %></td>
   </tr>
 """)
@@ -69,10 +75,22 @@ window.retrieve_messages = ->
   $.getJSON("/messages?key=#{sodium.to_hex(public_key())}", (data) ->
     table_html = document.createElement('table')
     $.each(data, ->
+      id = this.id
       source = this.source
-      metadata = JSON.parse(sodium.to_string(decrypt(this.metadata.metadata, this.metadata.nonce, source)))
-      table_html += message_row({metadata: metadata, source: source}))
+      metadata = decrypt_json(this.metadata.metadata, this.metadata.nonce, source)
+      table_html += message_row({id: id, metadata: metadata, source: source}))
     $('#messagelist').append(table_html))
+
+# Used by /messages/:id/view
+
+window.decrypt_message = ->
+  msg = JSON.parse($('#message').text())
+  metadata = decrypt_json(msg.metadata.metadata, msg.metadata.nonce, msg.source)
+  body = decrypt_string(msg.body.body, msg.body.nonce, msg.source)
+  $('#subject').html(metadata.subject)
+  $('#date').html(metadata.sent_at)
+  $('#body').html(body)
+
 
 # Used by /messages/new
 

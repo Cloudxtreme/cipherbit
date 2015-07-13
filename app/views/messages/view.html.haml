@@ -1,0 +1,17 @@
+%h1{id: 'subject'}
+%div{id: 'date'}
+
+%p{id: 'body'}
+
+%hr
+
+Your public key:
+%span{id: 'pubkey'}
+
+%script{id: 'message', type: 'application/json'}
+  = @message.to_json.html_safe
+
+-# View specific JavaScript
+:coffee
+  $(document).ready ->
+    window.decrypt_message()

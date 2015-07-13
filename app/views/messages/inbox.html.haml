@@ -1,24 +1,12 @@
-%navigation
-  %ul
-    %li
-      %a{href: '/messages/inbox'}
-        Inbox
-    %li
-      %a{href: '/messages/new'}
-        Compose
+%h1 Inbox
 
-  Your key art:
-  %div{id: 'keyart'}
+%div{id: 'messagelist'}
 
-%main
-  %h1 Inbox
+%hr
 
-  %div{id: 'messagelist'}
+Your public key:
+%span{id: 'pubkey'}
 
-  %hr
-
-  Your public key:
-  %span{id: 'pubkey'}
 -# View specific JavaScript
 :coffee
   $(document).ready ->

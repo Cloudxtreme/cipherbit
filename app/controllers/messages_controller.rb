@@ -8,6 +8,16 @@ class MessagesController < ApplicationController
   def inbox
   end
 
+  def view
+    safe_params = params.permit(:id)
+    id = safe_params[:id]
+    message_option = Message.where(id: id)
+    if message_option.blank?
+      render file: "#{Rails.root}/public/404.html" , status: :not_found
+    end
+    @message = message_option.first
+  end
+
   def new
   end
 
@@ -18,12 +28,17 @@ class MessagesController < ApplicationController
     render json: Message.where(destination: key)
   end
 
+  def show
+    id = params[:id].to_i
+    render json: Message.find(id)
+  end
+
   def create
     Message.create(source: message_params[:source],
                    destination: message_params[:destination],
                    metadata: build_metadata,
                    body: build_body)
-    redirect_to action: 'inbox'
+    redirect_to :inbox_messages
   end
 
   private

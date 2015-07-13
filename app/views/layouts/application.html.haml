@@ -7,4 +7,20 @@
     = javascript_include_tag 'application'
     = csrf_meta_tags
   %body
-    = yield
+    %navigation
+      %ul
+        %li
+          %a{href: '/messages/inbox'}
+            Inbox
+        %li
+          %a{href: '/messages/new'}
+            Compose
+        %li
+          %a{href: '/settings'}
+            Settings
+
+      Your key art:
+      %div{id: 'keyart'}
+
+    %main
+      = yield

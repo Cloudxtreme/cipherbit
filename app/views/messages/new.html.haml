@@ -1,56 +1,42 @@
-%navigation
-  %ul
-    %li
-      %a{href: '/messages/inbox'}
-        Inbox
-    %li
-      %a{href: '/messages/new'}
-        Compose
+%h1 Compose
+%form{id: 'messageform', action: "#{ messages_path }", method: 'post', autocomplete: 'off'}
 
-  Your key art:
-  %div{id: 'keyart'}
+  -# Submitted but not shown
+  %input{type: 'hidden', name: 'authenticity_token', value: "#{ form_authenticity_token }"}
 
-%main
+  -# Hidden fields populated by client-side script prior to submission
+  %input{type: 'hidden', name: 'metadata', id: 'metadata'}
+  %input{type: 'hidden', name: 'metadata_nonce', id: 'metadata_nonce'}
 
-  %h1 Compose
-  %form{id: 'messageform', action: "#{ messages_path }", method: 'post', autocomplete: 'off'}
+  %input{type: 'hidden', name: 'body', id: 'body'}
+  %input{type: 'hidden', name: 'body_nonce', id: 'body_nonce'}
 
-    -# Submitted but not shown
-    %input{type: 'hidden', name: 'authenticity_token', value: "#{ form_authenticity_token }"}
+  %input{type: 'hidden', name: 'source', id: 'source'}
 
-    -# Hidden fields populated by client-side script prior to submission
-    %input{type: 'hidden', name: 'metadata', id: 'metadata'}
-    %input{type: 'hidden', name: 'metadata_nonce', id: 'metadata_nonce'}
+  %p
+    %label{for:'destination'}
+      Recipient's Key
+    %br
+    %input{type: 'text', size: '70', name: 'destination', id: 'destination'}
 
-    %input{type: 'hidden', name: 'body', id: 'body'}
-    %input{type: 'hidden', name: 'body_nonce', id: 'body_nonce'}
+  -# Shown but not submitted.  Used to generate data in hidden form
+    fields by client-side script
+  %p
+    %label{for:'subject'}
+      Subject
+    %br
+    %input{type: 'text', size: '70', id: 'form_subject'}
 
-    %input{type: 'hidden', name: 'source', id: 'source'}
+  %p
+    %textarea{rows: '15', cols: '70', id: 'form_body'}
 
-    %p
-      %label{for:'destination'}
-        Recipient's Key
-      %br
-      %input{type: 'text', size: '70', name: 'destination', id: 'destination'}
+  %button{type: 'button', id: 'encryptandsend'}
+    Encrypt & Send
 
-    -# Shown but not submitted.  Used to generate data in hidden form
-      fields by client-side script
-    %p
-      %label{for:'subject'}
-        Subject
-      %br
-      %input{type: 'text', size: '70', id: 'form_subject'}
+%hr
 
-    %p
-      %textarea{rows: '15', cols: '70', id: 'form_body'}
-
-    %button{type: 'button', id: 'encryptandsend'}
-      Encrypt & Send
-
-  %hr
-
-  Your public key:
-  %span{id: 'pubkey'}
+Your public key:
+%span{id: 'pubkey'}
 
 -# View specific JavaScript
 :coffee
