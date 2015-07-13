@@ -4,9 +4,8 @@ public_key_key = "#{host}.public_key"
 private_key_key = "#{host}.private_key"
 storage = localStorage
 
-public_key = -> sodium.from_hex(storage.getItem(public_key_key) || '00')
-
-private_key = -> sodium.from_hex(storage.getItem(private_key_key) || '00')
+window.public_key = -> sodium.from_hex(storage.getItem(public_key_key) || '00')
+window.private_key = -> sodium.from_hex(storage.getItem(private_key_key) || '00')
 
 destination_key = ->
   field_content = $('#destination').val()
@@ -19,7 +18,7 @@ destination_key = ->
 encrypt = (text, public_key) ->
   nonce = sodium.randombytes_buf(sodium.crypto_box_NONCEBYTES)
   {
-    ciphertext: sodium.crypto_box_easy(text, nonce, public_key, private_key()),
+    ciphertext: sodium.crypto_box_easy(text, nonce, public_key, window.private_key()),
     nonce: nonce
   }
 
@@ -27,7 +26,7 @@ decrypt = (ciphertext, nonce, source) ->
   c = sodium.from_hex(ciphertext)
   n = sodium.from_hex(nonce)
   pub = sodium.from_hex(source)
-  pvt = private_key()
+  pvt = window.private_key()
   sodium.crypto_box_open_easy(c, n, pub, pvt)
 
 decrypt_string = (ciphertext, nonce, source) ->
@@ -56,7 +55,7 @@ message_row = _.template("""
 # Top-level functions called by views
 
 window.initialize = ->
-  generate_keys() if public_key().length == 1
+  generate_keys() if window.public_key().length == 1
   window.populate_key_info()
 
 window.generate_keys = ->
@@ -65,14 +64,14 @@ window.generate_keys = ->
   storage.setItem(private_key_key, sodium.to_hex(keypair.privateKey))
 
 window.populate_key_info = ->
-  $('#pubkey').html(sodium.to_hex(public_key()))
-  $('#keyart').html("<pre>#{randomart(public_key())}</pre>")
+  $('#pubkey').html(sodium.to_hex(window.public_key()))
+  $('#keyart').html("<pre>#{randomart(window.public_key())}</pre>")
 
 
 # Used by /messages/inbox
 
 window.retrieve_messages = ->
-  $.getJSON("/messages?key=#{sodium.to_hex(public_key())}", (data) ->
+  $.getJSON("/messages?key=#{sodium.to_hex(window.public_key())}", (data) ->
     table_html = document.createElement('table')
     $.each(data, ->
       id = this.id
@@ -97,7 +96,7 @@ window.decrypt_message = ->
 window.encrypt_and_send = ->
   dest_key = destination_key()
   return if not dest_key
-  source_key = sodium.to_hex(public_key())
+  source_key = sodium.to_hex(window.public_key())
   metadata =
     sent_at: new Date().toUTCString()
     subject: $('#form_subject').val()
