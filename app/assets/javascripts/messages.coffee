@@ -1,11 +1,11 @@
+BLANK_KEY_HEX = '00'
+
 sodium = window.sodium
-host = window.location.host
-public_key_key = "#{host}.public_key"
-private_key_key = "#{host}.private_key"
+public_key_key = "public_key"
+private_key_key = "private_key"
 storage = localStorage
 
-window.public_key = -> sodium.from_hex(storage.getItem(public_key_key) || '00')
-window.private_key = -> sodium.from_hex(storage.getItem(private_key_key) || '00')
+window.private_key = -> sodium.from_hex(storage.getItem(private_key_key) || BLANK_KEY_HEX)
 
 destination_key = ->
   field_content = $('#destination').val()
@@ -18,7 +18,7 @@ destination_key = ->
 encrypt = (text, public_key) ->
   nonce = sodium.randombytes_buf(sodium.crypto_box_NONCEBYTES)
   {
-    ciphertext: sodium.crypto_box_easy(text, nonce, public_key, window.private_key()),
+    ciphertext: sodium.crypto_box_easy(text, nonce, public_key, private_key()),
     nonce: nonce
   }
 
@@ -26,7 +26,7 @@ decrypt = (ciphertext, nonce, source) ->
   c = sodium.from_hex(ciphertext)
   n = sodium.from_hex(nonce)
   pub = sodium.from_hex(source)
-  pvt = window.private_key()
+  pvt = private_key()
   sodium.crypto_box_open_easy(c, n, pub, pvt)
 
 decrypt_string = (ciphertext, nonce, source) ->
@@ -54,24 +54,32 @@ message_row = _.template("""
 
 # Top-level functions called by views
 
+window.public_key_hex = -> storage.getItem(public_key_key) || BLANK_KEY_HEX
+window.public_key = -> sodium.from_hex(public_key_hex())
+
 window.initialize = ->
-  generate_keys() if window.public_key().length == 1
-  window.populate_key_info()
+  generate_keys() if public_key().length == 1
+  populate_key_info()
 
 window.generate_keys = ->
   keypair = sodium.crypto_box_keypair()
-  storage.setItem(public_key_key, sodium.to_hex(keypair.publicKey))
-  storage.setItem(private_key_key, sodium.to_hex(keypair.privateKey))
+  pub_hex = sodium.to_hex(keypair.publicKey)
+  pvt_hex = sodium.to_hex(keypair.privateKey)
+  set_public_private_keys(pub_hex, pvt_hex)
+
+window.set_public_private_keys = (public_key_hex, private_key_hex) ->
+  storage.setItem(public_key_key, public_key_hex)
+  storage.setItem(private_key_key, private_key_hex)
 
 window.populate_key_info = ->
-  $('#pubkey').html(sodium.to_hex(window.public_key()))
-  $('#keyart').html("<pre>#{randomart(window.public_key())}</pre>")
+  $('#pubkey').html(public_key_hex())
+  $('#keyart').html("<pre>#{randomart(public_key())}</pre>")
 
 
 # Used by /messages/inbox
 
 window.retrieve_messages = ->
-  $.getJSON("/messages?key=#{sodium.to_hex(window.public_key())}", (data) ->
+  $.getJSON("/messages?key=#{public_key_hex()}", (data) ->
     table_html = document.createElement('table')
     $.each(data, ->
       id = this.id
@@ -96,7 +104,7 @@ window.decrypt_message = ->
 window.encrypt_and_send = ->
   dest_key = destination_key()
   return if not dest_key
-  source_key = sodium.to_hex(window.public_key())
+  source_key = public_key_hex()
   metadata =
     sent_at: new Date().toUTCString()
     subject: $('#form_subject').val()
@@ -111,4 +119,4 @@ window.encrypt_and_send = ->
   populate_message_and_submit(bundle)
 
 $(document).ready ->
-  window.initialize()
+  initialize()

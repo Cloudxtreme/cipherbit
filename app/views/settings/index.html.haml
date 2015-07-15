@@ -1,7 +1,19 @@
 %h1 Settings
 
 %p
-  %textarea{rows: '15', cols: '70', id: 'jsonsettings'}
+  Keys in Cipherbit are generated in your browser, and stored in your browser.  The private key is never passed over the network.  Keep your keys safe!
+
+%h2 Current keys
+%p
+  %textarea{rows: '15', cols: '70', id: 'current-settings', readonly: true}
+
+%h2 Import keys
+This will erase and replace your existing keys!
+%p
+  %textarea{rows: '15', cols: '70', id: 'import-settings'}
+%p
+  %button{id: 'save-settings'}
+    Import
 
 %hr
 
@@ -12,3 +24,4 @@ Your public key:
 :coffee
   $(document).ready ->
     window.show_settings()
+    window.setup_settings_button()
