@@ -32,8 +32,18 @@ decrypt = (ciphertext, nonce, source) ->
 decrypt_string = (ciphertext, nonce, source) ->
   sodium.to_string(decrypt(ciphertext, nonce, source))
 
+safe_decrypt_string = (ciphertext, nonce, source) ->
+  _.escape(decrypt_string(ciphertext, nonce, source))
+
 decrypt_json = (ciphertext, nonce, source) ->
   JSON.parse(decrypt_string(ciphertext, nonce, source))
+
+safe_decrypt_json = (ciphertext, nonce, source) ->
+  raw_obj = decrypt_json(ciphertext, nonce, source)
+  safe_obj = {}
+  _.each(raw_obj, (value, key, list) ->
+    safe_obj[key] = _.escape(value))
+  safe_obj
 
 populate_message_and_submit = (bundle) ->
   $('#source').val(bundle.source_key)
@@ -84,7 +94,7 @@ window.retrieve_messages = ->
     $.each(data, ->
       id = this.id
       source = this.source
-      metadata = decrypt_json(this.metadata.metadata, this.metadata.nonce, source)
+      metadata = safe_decrypt_json(this.metadata.metadata, this.metadata.nonce, source)
       table_html += message_row({id: id, metadata: metadata, source: source}))
     $('#messagelist').append(table_html))
 
@@ -92,8 +102,8 @@ window.retrieve_messages = ->
 
 window.decrypt_message = ->
   msg = JSON.parse($('#message').text())
-  metadata = decrypt_json(msg.metadata.metadata, msg.metadata.nonce, msg.source)
-  body = decrypt_string(msg.body.body, msg.body.nonce, msg.source)
+  metadata = safe_decrypt_json(msg.metadata.metadata, msg.metadata.nonce, msg.source)
+  body = safe_decrypt_string(msg.body.body, msg.body.nonce, msg.source)
   $('#subject').html(metadata.subject)
   $('#date').html(metadata.sent_at)
   $('#body').html(body)
