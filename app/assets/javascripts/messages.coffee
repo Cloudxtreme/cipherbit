@@ -6,10 +6,11 @@ private_key_key = "private_key"
 storage = localStorage
 
 window.private_key = -> sodium.from_hex(storage.getItem(private_key_key) || BLANK_KEY_HEX)
+window.private_encryption_key = -> sodium.crypto_sign_ed25519_sk_to_curve25519(private_key())
 
 destination_key = ->
   field_content = $('#destination').val()
-  expected_key_length = sodium.crypto_box_PUBLICKEYBYTES * 2 # hex strings use two characters per byte
+  expected_key_length = sodium.crypto_sign_PUBLICKEYBYTES * 2 # hex strings use two characters per byte
   if field_content.length != expected_key_length
     alert("Recipient's key must be #{expected_key_length} characters")
     return
@@ -17,16 +18,17 @@ destination_key = ->
 
 encrypt = (text, public_key) ->
   nonce = sodium.randombytes_buf(sodium.crypto_box_NONCEBYTES)
+  public_encryption_key = sodium.crypto_sign_ed25519_pk_to_curve25519(public_key)
   {
-    ciphertext: sodium.crypto_box_easy(text, nonce, public_key, private_key()),
+    ciphertext: sodium.crypto_box_easy(text, nonce, public_encryption_key, private_encryption_key()),
     nonce: nonce
   }
 
 decrypt = (ciphertext, nonce, source) ->
   c = sodium.from_hex(ciphertext)
   n = sodium.from_hex(nonce)
-  pub = sodium.from_hex(source)
-  pvt = private_key()
+  pub = sodium.crypto_sign_ed25519_pk_to_curve25519(sodium.from_hex(source))
+  pvt = private_encryption_key()
   sodium.crypto_box_open_easy(c, n, pub, pvt)
 
 decrypt_string = (ciphertext, nonce, source) ->
@@ -72,7 +74,7 @@ window.initialize = ->
   populate_key_info()
 
 window.generate_keys = ->
-  keypair = sodium.crypto_box_keypair()
+  keypair = sodium.crypto_sign_keypair()
   pub_hex = sodium.to_hex(keypair.publicKey)
   pvt_hex = sodium.to_hex(keypair.privateKey)
   set_public_private_keys(pub_hex, pvt_hex)
