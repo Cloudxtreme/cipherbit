@@ -16,12 +16,16 @@ destination_key = ->
     return
   sodium.from_hex(field_content)
 
-encrypt = (text, public_key) ->
+# Return a JSON object with hex-encoded keys for the ciphertext, nonce, and detached signature.
+encryptandsign = (text, public_key) ->
   nonce = sodium.randombytes_buf(sodium.crypto_box_NONCEBYTES)
   public_encryption_key = sodium.crypto_sign_ed25519_pk_to_curve25519(public_key)
+  ciphertext = sodium.crypto_box_easy(text, nonce, public_encryption_key, private_encryption_key())
+  signature = sodium.crypto_sign_detached(sodium.to_hex(ciphertext), private_key())
   {
-    ciphertext: sodium.crypto_box_easy(text, nonce, public_encryption_key, private_encryption_key()),
-    nonce: nonce
+    ciphertext: sodium.to_hex(ciphertext),
+    nonce: sodium.to_hex(nonce),
+    signature: sodium.to_hex(signature)
   }
 
 decrypt = (ciphertext, nonce, source) ->
@@ -48,11 +52,11 @@ safe_decrypt_json = (ciphertext, nonce, source) ->
   safe_obj
 
 populate_message_and_submit = (bundle) ->
+  metadata = JSON.stringify(bundle.metadata)
+  body = JSON.stringify(bundle.body)
   $('#source').val(bundle.source_key)
-  $('#metadata').val(sodium.to_hex(bundle.encrypted_metadata['ciphertext']))
-  $('#metadata_nonce').val(sodium.to_hex(bundle.encrypted_metadata['nonce']))
-  $('#body').val(sodium.to_hex(bundle.encrypted_body['ciphertext']))
-  $('#body_nonce').val(sodium.to_hex(bundle.encrypted_body['nonce']))
+  $('#metadata').val(metadata)
+  $('#body').val(body)
   $('#messageform').submit()
 
 # Template to render rows in the message inbox
@@ -96,7 +100,7 @@ window.retrieve_messages = ->
     $.each(data, ->
       id = this.id
       source = this.source
-      metadata = safe_decrypt_json(this.metadata.metadata, this.metadata.nonce, source)
+      metadata = safe_decrypt_json(this.metadata.ciphertext, this.metadata.nonce, source)
       table_html += message_row({id: id, metadata: metadata, source: source}))
     $('#messagelist').append(table_html))
 
@@ -104,8 +108,8 @@ window.retrieve_messages = ->
 
 window.decrypt_message = ->
   msg = JSON.parse($('#message').text())
-  metadata = safe_decrypt_json(msg.metadata.metadata, msg.metadata.nonce, msg.source)
-  body = safe_decrypt_string(msg.body.body, msg.body.nonce, msg.source)
+  metadata = safe_decrypt_json(msg.metadata.ciphertext, msg.metadata.nonce, msg.source)
+  body = safe_decrypt_string(msg.body.ciphertext, msg.body.nonce, msg.source)
   $('#subject').html(metadata.subject)
   $('#date').html(metadata.sent_at)
   $('#body').html(body)
@@ -125,8 +129,8 @@ window.encrypt_and_send = ->
   bundle =
     source_key: source_key
     dest_key: dest_key
-    encrypted_metadata: encrypt(JSON.stringify(metadata), dest_key)
-    encrypted_body: encrypt(body, dest_key)
+    metadata: encryptandsign(JSON.stringify(metadata), dest_key)
+    body: encryptandsign(body, dest_key)
 
   populate_message_and_submit(bundle)
 
