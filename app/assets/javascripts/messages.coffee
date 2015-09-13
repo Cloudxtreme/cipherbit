@@ -3,7 +3,7 @@ BLANK_KEY_HEX = '00'
 sodium = window.sodium
 public_key_key = "public_key"
 private_key_key = "private_key"
-storage = localStorage
+window.storage = localStorage
 
 window.private_key = -> sodium.from_hex(storage.getItem(private_key_key) || BLANK_KEY_HEX)
 window.private_encryption_key = -> sodium.crypto_sign_ed25519_sk_to_curve25519(private_key())
@@ -17,7 +17,7 @@ destination_key = ->
   sodium.from_hex(field_content)
 
 # Return a JSON object with hex-encoded keys for the ciphertext, nonce, and detached signature.
-encryptandsign = (text, public_key) ->
+window.encrypt_and_sign = (text, public_key) ->
   nonce = sodium.randombytes_buf(sodium.crypto_box_NONCEBYTES)
   public_encryption_key = sodium.crypto_sign_ed25519_pk_to_curve25519(public_key)
   ciphertext = sodium.crypto_box_easy(text, nonce, public_encryption_key, private_encryption_key())
@@ -129,8 +129,8 @@ window.encrypt_and_send = ->
   bundle =
     source_key: source_key
     dest_key: dest_key
-    metadata: encryptandsign(JSON.stringify(metadata), dest_key)
-    body: encryptandsign(body, dest_key)
+    metadata: encrypt_and_sign(JSON.stringify(metadata), dest_key)
+    body: encrypt_and_sign(body, dest_key)
 
   populate_message_and_submit(bundle)
 

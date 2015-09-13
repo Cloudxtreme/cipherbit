@@ -9,8 +9,7 @@ class MessagesController < ApplicationController
   end
 
   def view
-    safe_params = params.permit(:id)
-    id = safe_params[:id]
+    id = params.permit(:id)
     message_option = Message.where(id: id)
     if message_option.blank?
       render file: "#{Rails.root}/public/404.html", status: :not_found

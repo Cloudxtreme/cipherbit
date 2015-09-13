@@ -1,0 +1,13 @@
+* Intro
+  This is the scrum board for Cipherbit. It uses a simple subset of
+  features in [[http://orgmode.org/][Org Mode]] to track current and upcoming work.
+* Ideas
+* Todo
+** Check signatures on sent messages                           :api:security:
+** Add nonce endpoint                                                   :api:
+** Enforce signed nonces                                       :api:security:
+** Add nonce support to authenticate inbox/message views       :web:security:
+** Inbox pagination support                                             :web:
+* Doing
+** Add web client unit tests                                    :testing:web:
+* Done
