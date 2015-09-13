@@ -8,6 +8,7 @@
 ** Enforce signed nonces                                       :api:security:
 ** Add nonce support to authenticate inbox/message views       :web:security:
 ** Inbox pagination support                                             :web:
+** Remove unit test JS from production JS payload               :web:testing:
 * Doing
 ** Add web client unit tests                                    :testing:web:
 * Done
