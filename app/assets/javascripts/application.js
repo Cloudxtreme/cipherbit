@@ -15,4 +15,5 @@
 //= require sodium.min
 //= require underscore-min
 //= require randomart
-//= require_tree .
+//= require messages
+//= require settings
