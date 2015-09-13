@@ -28,23 +28,24 @@ window.encrypt_and_sign = (text, public_key) ->
     signature: sodium.to_hex(signature)
   }
 
-decrypt = (ciphertext, nonce, source) ->
+# Accepts hex strings
+window.decrypt = (ciphertext, nonce, source) ->
   c = sodium.from_hex(ciphertext)
   n = sodium.from_hex(nonce)
   pub = sodium.crypto_sign_ed25519_pk_to_curve25519(sodium.from_hex(source))
   pvt = private_encryption_key()
   sodium.crypto_box_open_easy(c, n, pub, pvt)
 
-decrypt_string = (ciphertext, nonce, source) ->
+window.decrypt_string = (ciphertext, nonce, source) ->
   sodium.to_string(decrypt(ciphertext, nonce, source))
 
-safe_decrypt_string = (ciphertext, nonce, source) ->
+window.safe_decrypt_string = (ciphertext, nonce, source) ->
   _.escape(decrypt_string(ciphertext, nonce, source))
 
-decrypt_json = (ciphertext, nonce, source) ->
+window.decrypt_json = (ciphertext, nonce, source) ->
   JSON.parse(decrypt_string(ciphertext, nonce, source))
 
-safe_decrypt_json = (ciphertext, nonce, source) ->
+window.safe_decrypt_json = (ciphertext, nonce, source) ->
   raw_obj = decrypt_json(ciphertext, nonce, source)
   safe_obj = {}
   _.each(raw_obj, (value, key, list) ->

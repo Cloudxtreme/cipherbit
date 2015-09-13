@@ -13,11 +13,11 @@ module 'When accessing storage', hooks
 
 test 'public key is fetched correctly', ->
   sandbox.stub(window.storage, 'getItem').withArgs('public_key').returns(pub_key)
-  ok(public_key_hex() == pub_key, 'Keys did not match')
+  ok(public_key_hex() == pub_key, 'Keys matched')
 
 test 'private key is fetched correctly', ->
   sandbox.stub(window.storage, 'getItem').withArgs('private_key').returns(pvt_key)
-  ok(sodium.to_hex(private_key()) == pvt_key, 'Keys did not match')
+  ok(sodium.to_hex(private_key()) == pvt_key, 'Keys matched')
 
 
 module 'When encrypting and signing'
@@ -26,22 +26,37 @@ obj = encrypt_and_sign('cipherbit test', sodium.from_hex(pub_key))
 hex_regex = /^[0-9a-f]+$/
 
 test 'it returns an object with ciphertext', ->
-  ok(obj.hasOwnProperty('ciphertext'), 'Ciphertext missing')
+  ok(obj.hasOwnProperty('ciphertext'), 'Ciphertext present')
 
 test 'the ciphertext is a hex string', ->
   ctext = obj.ciphertext
-  ok(hex_regex.test(ctext), "Ciphertext #{ctext} is not a hex string")
+  ok(hex_regex.test(ctext), "Ciphertext #{ctext} is a hex string")
 
 test 'it returns an object with nonce', ->
-  ok(obj.hasOwnProperty('nonce'), 'Nonce missing')
+  ok(obj.hasOwnProperty('nonce'), 'Nonce present')
 
 test 'the nonce is a hex string', ->
   nonce = obj.nonce
-  ok(hex_regex.test(nonce), "Nonce #{nonce} is not a hex string")
+  ok(hex_regex.test(nonce), "Nonce #{nonce} is a hex string")
 
 test 'it returns an object with signature', ->
-  ok(obj.hasOwnProperty('signature'), 'Signature missing')
+  ok(obj.hasOwnProperty('signature'), 'Signature present')
 
 test 'the signature is a hex string', ->
   sig = obj.signature
-  ok(hex_regex.test(sig), "Signature #{sig} is not a hex string")
+  ok(hex_regex.test(sig), "Signature #{sig} is a hex string")
+
+module 'When decrypting and verifying', hooks
+
+test 'safe_decrypt_string escapes strings', ->
+  window.decrypt_string = sandbox.stub().returns('<&?>')
+  ok(safe_decrypt_string(null, null, null) == '&lt;&amp;?&gt;',
+     'String was escaped')
+
+test 'safe_decrypt_json escapes value strings', ->
+  unsafe_json = { 'foo': '<&?>', 'bar': 'hi&' }
+  window.decrypt_json = sandbox.stub().returns(unsafe_json)
+  ok(safe_decrypt_json(null, null, null).foo == '&lt;&amp;?&gt;',
+     'First value was escaped')
+  ok(safe_decrypt_json(null, null, null).bar == 'hi&amp;',
+     'Second value was escaped')
