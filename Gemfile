@@ -16,6 +16,9 @@ gem 'coffee-rails', '~> 4.1.0'
 gem 'jquery-rails'
 gem "haml-rails", "~> 0.9"
 
+# Key verification via libsodium
+gem 'rbnacl'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

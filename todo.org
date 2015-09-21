@@ -2,13 +2,41 @@
   This is the scrum board for Cipherbit. It uses a simple subset of
   features in [[http://orgmode.org/][Org Mode]] to track current and upcoming work.
 * Ideas
+** Attachments
+   - Array attached to body?
+   - Interesting: this is an entirely client-side feature
+** Create Chrome/Firefox extension to provide secure delivery for web client code
+   Both support extension signing, alleviating the need to trust the server
+** Encrypt private key in localStorage
+   - Sessionstore to store encryption credentials for private key
+   - Symmetric encryption for private key using hash of password
+   - This requires careful design and large UI changes
+** Max message size
+   - Limit the body to something sane
+   - Investigate performance issue of non-indexed wide columns (~1MB)
+** Address book encrypted and synced with server
 * Todo
-** Check signatures on sent messages                           :api:security:
+** Use guids instead of integers for public message IDs
+   Integer IDs expose lots of information about the messages table
+** Experiment with React on client-side
+   - [[https://github.com/reactjs/react-rails][react-rails]] looks like a good starting point, and supports Coffeescript
 ** Add nonce endpoint                                                   :api:
 ** Enforce signed nonces                                       :api:security:
 ** Add nonce support to authenticate inbox/message views       :web:security:
+** Make web interface responsive                                        :web:
+   - Should be usable on mobile/tablet
 ** Inbox pagination support                                             :web:
-** Remove unit test JS from production JS payload               :web:testing:
+** Filter source and destination key in the logs
+   #+BEGIN_EXAMPLE
+   You can filter certain request parameters from your log files by
+   appending them to config.filter_parameters in the application
+   configuration. These parameters will be marked [FILTERED] in the
+   log.
+
+   config.filter_parameters << :password
+   #+END_EXAMPLE
 * Doing
 ** Add web client unit tests                                    :testing:web:
 * Done
+** Remove unit test JS from production JS payload               :web:testing:
+** Check signatures on sent messages                           :api:security:
